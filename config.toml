@@ -1,0 +1,4 @@
+baseURL = "http://example.org/"
+languageCode = "ja-jp"
+title = "心にうつりゆくよしなしごと"
+theme = "beautifulhugo"
