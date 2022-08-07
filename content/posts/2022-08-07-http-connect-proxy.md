@@ -35,7 +35,7 @@ loop {
 }
 ```
 
-### proxyサーバへの接続
+## proxyサーバへの接続
 proxyサーバにHTTP Connectで接続し、targetサーバへの転送を要求する。ここで注意しないといけないのは`hyper::Client::request`はデフォルトの設定だと`Request`で指定されているhostにTCP接続を試みるということ。HTTP ConnectではproxyサーバにTCPの接続し、hostにはtargetを指定しないといけないのでこの挙動では問題がある[^hyper-2863]。hyperでは`Uri`から`TcpStream` (正確には`AsyncRead + AsyncWrite`) を返す`Service`をcustom connectorとして設定できるので、`Request`由来のuriは無視してproxyサーバへのTCPコネクションを返すような`Service`を実装すればよい。当初は愚直に自前でstructを定義しtrait実装をしていたが、`tower::util::MapRequest`を使うと既存の`HttpConnector`を流用できることに気づいたのでそうした。
 ```rust
 use hyper::client::HttpConnector;
@@ -66,7 +66,7 @@ loop {
    );
 ```
 
-### 通信のバイパス
+## 通信のバイパス
 clientとの接続およびproxyサーバとの接続が確立できたので、
 あとは双方の通信をバイパスするだけでよい。
 proxyサーバとの接続はHTTPに則った処理のあとにTCPコネクションを流用する形になるので、`hyper::upgrade::on`[^hyper-upgrade-on]で`AsyncRead + AsyncWrite`として扱えるようにする。`hyper::client::conn`を使って`TCPStream`を自分でハンドリングするという方法もあり[^hyper-2863]、試したところ問題なく動作した。ただ今回の用途ではこちらの方が簡便。最後に`tokio::io::copy_bidirectional`で双方向にコピーすることでバイパスするだけでOK (tokioがあれもこれも提供してくれていて驚く)。
