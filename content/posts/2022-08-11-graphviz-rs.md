@@ -120,7 +120,6 @@ error: Failed to translate sffmtpos: Unsupported va_copy
 ```
 うーん。
 
-
 ## 参考
 [^graphviz]: https://graphviz.org/
 [^c2rust]: https://c2rust.com/
